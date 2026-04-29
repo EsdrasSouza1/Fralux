@@ -1,22 +1,543 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fralux | Painéis Elétricos, Automação e Manutenção Industrial</title>
-    <link rel="icon" type="image/png" href="/favicon.png" />
-    <meta name="description" content="Fralux: montagem de painéis elétricos, automação industrial, manutenção e retrofit. Atendimento em todo o Brasil. Araras/SP." />
-    <meta name="author" content="Fralux" />
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fralux | Painéis Elétricos, Automação e Manutenção Industrial</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <meta name="description" content="Fralux: montagem de painéis elétricos, automação industrial, manutenção e retrofit. Atendimento em todo o Brasil. Araras/SP." />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style type="text/tailwindcss">
+    @layer base {
+      :root {
+        --background: 222 60% 8%;
+        --foreground: 210 40% 98%;
+        --card: 222 55% 11%;
+        --card-foreground: 210 40% 98%;
+        --primary: 0 84% 55%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 222 45% 16%;
+        --secondary-foreground: 210 40% 98%;
+        --muted: 222 40% 18%;
+        --muted-foreground: 215 25% 70%;
+        --border: 222 40% 20%;
+        
+        --gradient-hero: linear-gradient(135deg, hsl(222 70% 6%) 0%, hsl(222 55% 12%) 50%, hsl(0 60% 20%) 100%);
+        --gradient-red: linear-gradient(135deg, hsl(0 84% 55%) 0%, hsl(0 75% 45%) 100%);
+        --gradient-card: linear-gradient(180deg, hsl(222 55% 13%) 0%, hsl(222 60% 9%) 100%);
+        --gradient-radial: radial-gradient(circle at 50% 0%, hsl(0 84% 55% / 0.15), transparent 60%);
+        
+        --shadow-red: 0 10px 40px -10px hsl(0 84% 55% / 0.5);
+        --shadow-card: 0 10px 30px -10px hsl(222 80% 4% / 0.6);
+        --shadow-glow: 0 0 60px hsl(0 84% 55% / 0.35);
+        
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      body {
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        scroll-behavior: smooth;
+      }
+    }
+    
+    @layer utilities {
+      .bg-gradient-hero { background: var(--gradient-hero); }
+      .bg-gradient-red { background: var(--gradient-red); }
+      .bg-gradient-card { background: var(--gradient-card); }
+      .bg-gradient-radial { background: var(--gradient-radial); }
+      .shadow-red { box-shadow: var(--shadow-red); }
+      .shadow-card-soft { box-shadow: var(--shadow-card); }
+      .shadow-glow { box-shadow: var(--shadow-glow); }
+      .transition-smooth { transition: var(--transition-smooth); }
+      
+      .circuit-bg {
+        background-image:
+          linear-gradient(hsl(0 84% 55% / 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, hsl(0 84% 55% / 0.06) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+      
+      .text-gradient-red {
+        background: var(--gradient-red);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    }
+  </style>
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px hsl(0 84% 55% / 0.4); }
+      50% { box-shadow: 0 0 40px hsl(0 84% 55% / 0.7); }
+    }
+    .animate-pulse-glow { animation: pulse-glow 2.5s ease-in-out infinite; }
+    
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up { animation: fade-up 0.7s ease-out forwards; }
 
-    <meta property="og:title" content="Fralux | Elétrica e Automação Industrial" />
-    <meta property="og:description" content="Projetos, montagem de painéis e consultoria técnica para o seu negócio." />
-    <meta property="og:type" content="website" />
+    /* Custom styles for layout */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 0.375rem; font-weight: 500; font-size: 0.875rem; transition: background-color 0.2s, color 0.2s;
+      height: 2.5rem; padding-left: 1rem; padding-right: 1rem;
+    }
+    .btn-lg { height: 3rem; padding-left: 2rem; padding-right: 2rem; font-size: 1rem; }
+    .btn-outline { border: 1px solid hsl(var(--border)); background-color: transparent; }
+    .btn-outline:hover { background-color: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+    
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
+      z-index: 100; display: none; justify-content: center; align-items: center;
+      padding: 1rem;
+    }
+    .modal-content {
+      background-color: hsl(var(--card)); color: hsl(var(--card-foreground));
+      border: 1px solid hsl(var(--border)); border-radius: 0.5rem;
+      max-width: 42rem; width: 100%; max-height: 85vh;
+      overflow-y: auto; padding: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+    }
+    .modal-active { display: flex; }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          container: {
+            center: true,
+            padding: "2rem",
+            screens: {
+              "2xl": "1400px",
+            },
+          },
+          colors: {
+            background: "hsl(var(--background))",
+            foreground: "hsl(var(--foreground))",
+            card: "hsl(var(--card))",
+            "card-foreground": "hsl(var(--card-foreground))",
+            primary: "hsl(var(--primary))",
+            "primary-foreground": "hsl(var(--primary-foreground))",
+            secondary: "hsl(var(--secondary))",
+            "secondary-foreground": "hsl(var(--secondary-foreground))",
+            muted: "hsl(var(--muted))",
+            "muted-foreground": "hsl(var(--muted-foreground))",
+            border: "hsl(var(--border))"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="min-h-screen text-foreground">
+  <div class="min-h-screen bg-background">
+    <!-- Navbar -->
+    <header class="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <div class="container flex h-32 items-center justify-between">
+        <img src="assets/fralux-logo.png" alt="Fralux - Serviços Elétricos e Automação" class="h-24 md:h-28 w-auto object-contain" />
+        <nav class="hidden items-center gap-8 md:flex">
+          <a href="#sobre" class="text-sm text-muted-foreground hover:text-foreground transition-smooth">Sobre</a>
+          <a href="#servicos" class="text-sm text-muted-foreground hover:text-foreground transition-smooth">Serviços</a>
+          <a href="#projetos" class="text-sm text-muted-foreground hover:text-foreground transition-smooth">Projetos</a>
+          <a href="#contato" class="text-sm text-muted-foreground hover:text-foreground transition-smooth">Contato</a>
+        </nav>
+        <a href="https://wa.me/5519983890975" target="_blank" rel="noopener" class="btn bg-gradient-red shadow-red text-primary-foreground hover:opacity-90">
+          <i data-lucide="message-circle" class="mr-2 h-4 w-4"></i> Orçamento
+        </a>
+      </div>
+    </header>
 
-    <meta name="twitter:card" content="summary_large_image" />
-  </head>
+    <!-- Hero -->
+    <section class="relative overflow-hidden bg-gradient-hero">
+      <div class="absolute inset-0 circuit-bg opacity-40"></div>
+      <div class="absolute inset-0 bg-gradient-radial"></div>
+      <div class="container relative grid gap-12 py-20 md:grid-cols-2 md:py-28 lg:py-32">
+        <div class="flex flex-col justify-center animate-fade-up">
+          <div class="mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5">
+            <span class="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+            <span class="text-xs font-medium uppercase tracking-wider text-primary-foreground">Atendemos todo o Brasil</span>
+          </div>
+          <h1 class="text-4xl font-black leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
+            Soluções completas em <span class="text-gradient-red">elétrica</span> e <span class="text-gradient-red">automação</span>
+          </h1>
+          <p class="mt-6 max-w-lg text-lg text-muted-foreground">
+            Projetos, montagem de painéis e consultoria técnica para o seu negócio,
+            com profissionais altamente qualificados.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-4">
+            <a href="https://wa.me/5519983890975" target="_blank" rel="noopener" class="btn btn-lg bg-gradient-red shadow-red text-primary-foreground hover:opacity-90">
+              <i data-lucide="message-circle" class="mr-2 h-5 w-5"></i> Solicitar Orçamento
+            </a>
+            <a href="#projetos" class="btn btn-lg btn-outline bg-secondary/40 hover:bg-secondary">
+              Ver Projetos <i data-lucide="arrow-right" class="ml-2 h-4 w-4"></i>
+            </a>
+          </div>
+          <div class="mt-10 flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+            <div class="flex items-center gap-2"><i data-lucide="map-pin" class="h-4 w-4 text-primary"></i> Araras / SP</div>
+            <div class="flex items-center gap-2"><i data-lucide="globe" class="h-4 w-4 text-primary"></i> Atendimento Nacional</div>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="absolute -inset-4 rounded-3xl bg-gradient-red opacity-20 blur-3xl"></div>
+          <img src="assets/hero-painel.jpg" alt="Painel elétrico industrial Fralux" class="relative rounded-2xl border border-border shadow-card-soft w-full" />
+        </div>
+      </div>
+    </section>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <!-- Trust strip -->
+    <section class="border-y border-border bg-card">
+      <div class="container grid grid-cols-2 gap-6 py-8 md:grid-cols-3">
+        <div class="flex items-center justify-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <i data-lucide="shield-check" class="h-6 w-6"></i>
+          </div>
+          <div>
+            <div class="font-bold leading-tight">Segurança</div>
+            <div class="text-sm text-muted-foreground">e Confiança</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <i data-lucide="cog" class="h-6 w-6"></i>
+          </div>
+          <div>
+            <div class="font-bold leading-tight">Tecnologia</div>
+            <div class="text-sm text-muted-foreground">e Qualidade</div>
+          </div>
+        </div>
+        <div class="flex items-center justify-center gap-4">
+          <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <i data-lucide="building-2" class="h-6 w-6"></i>
+          </div>
+          <div>
+            <div class="font-bold leading-tight">Profissionais</div>
+            <div class="text-sm text-muted-foreground">Qualificados</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sobre -->
+    <section id="sobre" class="container py-20 md:py-28">
+      <div class="grid gap-12 md:grid-cols-2 md:items-center">
+        <div>
+          <img src="assets/painel-1.jpeg" alt="Painel elétrico Fralux" loading="lazy" class="w-full rounded-2xl border border-border shadow-card-soft" />
+        </div>
+        <div>
+          <div class="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-primary">Sobre a Fralux</div>
+          <h2 class="text-3xl font-black tracking-tight md:text-4xl">Especialistas em montagem, instalação e manutenção elétrica</h2>
+          <p class="mt-6 text-lg text-muted-foreground">
+            A Fralux é uma empresa de montagem, instalação, manutenção elétrica e automação. Pronta para resolver as necessidades do seu negócio com profissionais altamente qualificados e atendimento em todo o Brasil.
+          </p>
+          <div class="mt-8 grid grid-cols-2 gap-6">
+            <div>
+              <div class="text-3xl font-black text-gradient-red">+10</div>
+              <div class="text-sm text-muted-foreground">Anos de experiência</div>
+            </div>
+            <div>
+              <div class="text-3xl font-black text-gradient-red">100%</div>
+              <div class="text-sm text-muted-foreground">Compromisso técnico</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Serviços -->
+    <section id="servicos" class="bg-card border-y border-border py-20 md:py-28">
+      <div class="container">
+        <div class="mx-auto max-w-2xl text-center">
+          <div class="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-primary">O que fazemos</div>
+          <h2 class="text-3xl font-black tracking-tight md:text-4xl">Serviços especializados</h2>
+          <p class="mt-4 text-muted-foreground">Uma estrutura completa para projetar, montar e manter sistemas elétricos e de automação.</p>
+        </div>
+        <div class="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div class="group relative overflow-hidden rounded-xl border border-border bg-gradient-card p-6 transition-smooth hover:border-primary/50 hover:-translate-y-1">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-smooth group-hover:bg-gradient-red group-hover:text-primary-foreground group-hover:shadow-red">
+              <i data-lucide="cog" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-lg font-bold">Montagem e Retrofit</h3>
+            <p class="mt-2 text-sm text-muted-foreground">Projeto e modernização de painéis elétricos sob medida.</p>
+          </div>
+          <div class="group relative overflow-hidden rounded-xl border border-border bg-gradient-card p-6 transition-smooth hover:border-primary/50 hover:-translate-y-1">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-smooth group-hover:bg-gradient-red group-hover:text-primary-foreground group-hover:shadow-red">
+              <i data-lucide="wrench" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-lg font-bold">Manutenção Industrial</h3>
+            <p class="mt-2 text-sm text-muted-foreground">Instalação e manutenção elétrica em equipamentos industriais.</p>
+          </div>
+          <div class="group relative overflow-hidden rounded-xl border border-border bg-gradient-card p-6 transition-smooth hover:border-primary/50 hover:-translate-y-1">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-smooth group-hover:bg-gradient-red group-hover:text-primary-foreground group-hover:shadow-red">
+              <i data-lucide="shield-check" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-lg font-bold">Assistência Técnica</h3>
+            <p class="mt-2 text-sm text-muted-foreground">Atendimento técnico ágil e especializado para sua operação.</p>
+          </div>
+          <div class="group relative overflow-hidden rounded-xl border border-border bg-gradient-card p-6 transition-smooth hover:border-primary/50 hover:-translate-y-1">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-smooth group-hover:bg-gradient-red group-hover:text-primary-foreground group-hover:shadow-red">
+              <i data-lucide="building-2" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-lg font-bold">Adequação a Normas</h3>
+            <p class="mt-2 text-sm text-muted-foreground">Conformidade com as principais normas regulamentadoras.</p>
+          </div>
+          <div class="group relative overflow-hidden rounded-xl border border-border bg-gradient-card p-6 transition-smooth hover:border-primary/50 hover:-translate-y-1">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-smooth group-hover:bg-gradient-red group-hover:text-primary-foreground group-hover:shadow-red">
+              <i data-lucide="zap" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-lg font-bold">Comércio de Materiais</h3>
+            <p class="mt-2 text-sm text-muted-foreground">Materiais elétricos em geral com qualidade garantida.</p>
+          </div>
+          <div class="group relative overflow-hidden rounded-xl border border-border bg-gradient-card p-6 transition-smooth hover:border-primary/50 hover:-translate-y-1">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary transition-smooth group-hover:bg-gradient-red group-hover:text-primary-foreground group-hover:shadow-red">
+              <i data-lucide="factory" class="h-6 w-6"></i>
+            </div>
+            <h3 class="text-lg font-bold">Consultoria Técnica</h3>
+            <p class="mt-2 text-sm text-muted-foreground">Soluções completas para o seu negócio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atuações -->
+    <section class="container py-20 md:py-28">
+      <div class="mx-auto max-w-2xl text-center">
+        <div class="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-primary">Principais atuações</div>
+        <h2 class="text-3xl font-black tracking-tight md:text-4xl">Setores onde entregamos resultado</h2>
+      </div>
+      <div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="snowflake" class="h-5 w-5"></i></div>
+          <span class="font-medium">Refrigeração Industrial</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="wind" class="h-5 w-5"></i></div>
+          <span class="font-medium">Compressores</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="droplets" class="h-5 w-5"></i></div>
+          <span class="font-medium">Condensadores Evaporativos</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="thermometer" class="h-5 w-5"></i></div>
+          <span class="font-medium">Túnel de Congelamento</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="snowflake" class="h-5 w-5"></i></div>
+          <span class="font-medium">Câmaras Frias</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="factory" class="h-5 w-5"></i></div>
+          <span class="font-medium">Máquinas de Gelo</span>
+        </div>
+        <div class="flex items-center gap-3 rounded-xl border border-border bg-gradient-card p-5 transition-smooth hover:border-primary/50">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><i data-lucide="droplets" class="h-5 w-5"></i></div>
+          <span class="font-medium">Sistemas de Bombas</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Projetos -->
+    <section id="projetos" class="bg-card border-y border-border py-20 md:py-28">
+      <div class="container">
+        <div class="mx-auto max-w-2xl text-center">
+          <div class="mb-4 text-sm font-bold uppercase tracking-[0.2em] text-primary">Nossos projetos</div>
+          <h2 class="text-3xl font-black tracking-tight md:text-4xl">Painéis montados pela Fralux</h2>
+          <p class="mt-4 text-muted-foreground">Cada painel é projetado e montado com rigor técnico, organização e segurança.</p>
+        </div>
+        <div class="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div class="group overflow-hidden rounded-2xl border border-border bg-background transition-smooth hover:border-primary/50 hover:shadow-red">
+            <div class="aspect-[4/5] overflow-hidden bg-muted">
+              <img src="assets/painel-3.jpeg" alt="Painel de Refrigeração 220V" loading="lazy" class="h-full w-full object-cover transition-smooth group-hover:scale-105" />
+            </div>
+            <div class="flex items-center justify-between p-5">
+              <div class="font-semibold">Painel de Refrigeração 220V</div>
+              <i data-lucide="check-circle-2" class="h-5 w-5 text-primary"></i>
+            </div>
+          </div>
+          <div class="group overflow-hidden rounded-2xl border border-border bg-background transition-smooth hover:border-primary/50 hover:shadow-red">
+            <div class="aspect-[4/5] overflow-hidden bg-muted">
+              <img src="assets/painel-6.jpeg" alt="Painel de Comando 380V" loading="lazy" class="h-full w-full object-cover transition-smooth group-hover:scale-105" />
+            </div>
+            <div class="flex items-center justify-between p-5">
+              <div class="font-semibold">Painel de Comando 380V</div>
+              <i data-lucide="check-circle-2" class="h-5 w-5 text-primary"></i>
+            </div>
+          </div>
+          <div class="group overflow-hidden rounded-2xl border border-border bg-background transition-smooth hover:border-primary/50 hover:shadow-red">
+            <div class="aspect-[4/5] overflow-hidden bg-muted">
+              <img src="assets/painel-2.jpeg" alt="Comando com IHM e Segurança" loading="lazy" class="h-full w-full object-cover transition-smooth group-hover:scale-105" />
+            </div>
+            <div class="flex items-center justify-between p-5">
+              <div class="font-semibold">Comando com IHM e Segurança</div>
+              <i data-lucide="check-circle-2" class="h-5 w-5 text-primary"></i>
+            </div>
+          </div>
+          <div class="group overflow-hidden rounded-2xl border border-border bg-background transition-smooth hover:border-primary/50 hover:shadow-red">
+            <div class="aspect-[4/5] overflow-hidden bg-muted">
+              <img src="assets/painel-5.jpeg" alt="Painel com Soft-Starter" loading="lazy" class="h-full w-full object-cover transition-smooth group-hover:scale-105" />
+            </div>
+            <div class="flex items-center justify-between p-5">
+              <div class="font-semibold">Painel com Soft-Starter</div>
+              <i data-lucide="check-circle-2" class="h-5 w-5 text-primary"></i>
+            </div>
+          </div>
+          <div class="group overflow-hidden rounded-2xl border border-border bg-background transition-smooth hover:border-primary/50 hover:shadow-red">
+            <div class="aspect-[4/5] overflow-hidden bg-muted">
+              <img src="assets/painel-1.jpeg" alt="Montagem Interna em Inox" loading="lazy" class="h-full w-full object-cover transition-smooth group-hover:scale-105" />
+            </div>
+            <div class="flex items-center justify-between p-5">
+              <div class="font-semibold">Montagem Interna em Inox</div>
+              <i data-lucide="check-circle-2" class="h-5 w-5 text-primary"></i>
+            </div>
+          </div>
+          <div class="group overflow-hidden rounded-2xl border border-border bg-background transition-smooth hover:border-primary/50 hover:shadow-red">
+            <div class="aspect-[4/5] overflow-hidden bg-muted">
+              <img src="assets/painel-4.jpeg" alt="Painel de Controle Compacto" loading="lazy" class="h-full w-full object-cover transition-smooth group-hover:scale-105" />
+            </div>
+            <div class="flex items-center justify-between p-5">
+              <div class="font-semibold">Painel de Controle Compacto</div>
+              <i data-lucide="check-circle-2" class="h-5 w-5 text-primary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contato -->
+    <section id="contato" class="container py-20 md:py-28">
+      <div class="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-hero p-10 md:p-16">
+        <div class="absolute inset-0 circuit-bg opacity-30"></div>
+        <div class="absolute -right-20 -top-20 h-72 w-72 rounded-full bg-primary/30 blur-3xl"></div>
+        <div class="relative grid gap-10 md:grid-cols-2 md:items-center">
+          <div>
+            <h2 class="text-3xl font-black tracking-tight md:text-4xl">
+              Pronto para o próximo <span class="text-gradient-red">projeto</span>?
+            </h2>
+            <p class="mt-4 text-lg text-muted-foreground">Fale com nossa equipe e receba uma proposta sob medida para o seu negócio.</p>
+            <div class="mt-8 space-y-4">
+              <a href="https://wa.me/5519983890975" target="_blank" rel="noopener" class="flex items-center gap-4 rounded-xl border border-border bg-card/60 p-4 transition-smooth hover:border-primary/50">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-red shadow-red">
+                  <i data-lucide="message-circle" class="h-6 w-6 text-primary-foreground"></i>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wider text-muted-foreground">WhatsApp</div>
+                  <div class="font-bold">(19) 98389-0975</div>
+                </div>
+              </a>
+              <a href="mailto:contato@fralluxautomacao.com.br" class="flex items-center gap-4 rounded-xl border border-border bg-card/60 p-4 transition-smooth hover:border-primary/50">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <i data-lucide="mail" class="h-6 w-6"></i>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wider text-muted-foreground">E-mail</div>
+                  <div class="font-bold break-all">contato@fralluxautomacao.com.br</div>
+                </div>
+              </a>
+              <div class="flex items-center gap-4 rounded-xl border border-border bg-card/60 p-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <i data-lucide="map-pin" class="h-6 w-6"></i>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wider text-muted-foreground">Localização</div>
+                  <div class="font-bold">Araras / SP — Atendimento Brasil</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col items-center justify-center gap-6 rounded-2xl border border-border bg-background/40 p-8 backdrop-blur">
+            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-red shadow-glow animate-pulse-glow">
+              <i data-lucide="message-circle" class="h-10 w-10 text-primary-foreground"></i>
+            </div>
+            <div class="text-center">
+              <div class="text-sm uppercase tracking-wider text-muted-foreground">Entre em contato</div>
+              <div class="mt-2 text-3xl font-black">(19) 98389-0975</div>
+            </div>
+            <a href="https://wa.me/5519983890975" target="_blank" rel="noopener" class="btn btn-lg w-full bg-gradient-red shadow-red text-primary-foreground hover:opacity-90">
+              Conversar no WhatsApp <i data-lucide="arrow-right" class="ml-2 h-4 w-4"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-border bg-card">
+      <div class="container flex flex-col items-center justify-between gap-6 py-10 md:flex-row">
+        <img src="assets/fralux-logo.png" alt="Fralux" class="h-28 w-auto object-contain" />
+        <div class="text-sm text-muted-foreground text-center md:text-right space-y-2">
+          <div>© <span id="year"></span> Fralux Serviços Elétricos e Automação. Todos os direitos reservados.</div>
+          <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 md:justify-end">
+            <button id="openModalBtn" class="font-medium text-foreground/80 hover:text-primary transition-smooth underline-offset-4 hover:underline">
+              Política de Privacidade
+            </button>
+            <span class="text-border">•</span>
+            <span>Desenvolvido por <a href="https://instagram.com/souza.web_" target="_blank" rel="noopener noreferrer" class="font-semibold text-primary hover:underline transition-smooth">@souza.web_</a></span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/5519983890975" target="_blank" rel="noopener" aria-label="Falar no WhatsApp" class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-red shadow-glow animate-pulse-glow transition-smooth hover:scale-110">
+      <i data-lucide="message-circle" class="h-7 w-7 text-primary-foreground"></i>
+    </a>
+
+    <!-- Modal Política de Privacidade -->
+    <div id="privacyModal" class="modal-overlay">
+      <div class="modal-content relative" onclick="event.stopPropagation()">
+        <button id="closeModalBtn" class="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+          <i data-lucide="x" class="h-6 w-6"></i>
+        </button>
+        <h2 class="text-2xl font-black mb-6">Política de <span class="text-gradient-red">Privacidade</span></h2>
+        <div class="space-y-5 text-sm text-muted-foreground leading-relaxed">
+          <p>
+            A <strong class="text-foreground">Fralux Serviços Elétricos e Automação</strong> respeita
+            a sua privacidade e está comprometida com a proteção dos dados pessoais
+            coletados em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
+          </p>
+          <div>
+            <h3 class="text-foreground font-bold mb-2">1. Coleta de Informações</h3>
+            <p>Coletamos informações fornecidas voluntariamente por você com o propósito exclusivo de responder solicitações e elaborar orçamentos.</p>
+          </div>
+          <div>
+            <h3 class="text-foreground font-bold mb-2">2. Uso das Informações</h3>
+            <ul class="list-disc pl-5 mt-2 space-y-1">
+              <li>Responder dúvidas e solicitações de orçamento;</li>
+              <li>Prestar serviços contratados;</li>
+              <li>Enviar comunicações comerciais relacionadas aos nossos serviços;</li>
+              <li>Cumprir obrigações legais e contratuais.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-foreground font-bold mb-2">3. Compartilhamento de Dados</h3>
+            <p>A Fralux não vende, aluga ou compartilha seus dados pessoais com terceiros.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    
+    // Icons
+    lucide.createIcons();
+
+    // Modal logic
+    const modal = document.getElementById('privacyModal');
+    const openBtn = document.getElementById('openModalBtn');
+    const closeBtn = document.getElementById('closeModalBtn');
+
+    openBtn.onclick = () => modal.classList.add('modal-active');
+    closeBtn.onclick = () => modal.classList.remove('modal-active');
+    modal.onclick = () => modal.classList.remove('modal-active');
+  </script>
+</body>
 </html>
